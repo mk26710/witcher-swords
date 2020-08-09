@@ -1,1 +1,6 @@
 Java.gitignore
+
+.idea/
+target/
+dependency-reduced-pom.xml
+witcherswords.iml
