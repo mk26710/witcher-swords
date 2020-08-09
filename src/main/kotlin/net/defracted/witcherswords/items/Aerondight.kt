@@ -27,25 +27,28 @@ package net.defracted.witcherswords.items
 
 import net.defracted.witcherswords.Main
 import net.md_5.bungee.api.ChatColor
+import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.attribute.Attribute
 import org.bukkit.attribute.AttributeModifier
 import org.bukkit.enchantments.Enchantment
-import org.bukkit.entity.Player
 import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataType
-import java.util.UUID
+import java.util.*
 import kotlin.collections.ArrayList
 
 
-class Aerondight(private val plugin: Main) {
-    val HIT_COUNTER_KEY = NamespacedKey(plugin, "HIT_COUNTER")
+class Aerondight(private val pl: Main) {
+    val HIT_COUNTER_KEY = NamespacedKey(pl, "HIT_COUNTER")
 
-    val PERSISTENT_KEY = NamespacedKey(plugin, "CODE_NAME")
+    val PERSISTENT_KEY = NamespacedKey(pl, "CODE_NAME")
     val CODE_NAME = "Aerondight EP2"
+
+    private val CHARGED_DAMAGE_MODE = AttributeModifier(UUID.randomUUID(), "generic.attackDamage", 100.0, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlot.HAND)
+    private val DEFAULT_ITEM_STACK = get()
 
     fun get(): ItemStack? {
         val sword = ItemStack(Material.IRON_SWORD)
@@ -70,6 +73,7 @@ class Aerondight(private val plugin: Main) {
         lore.add(ChatColor.translateAlternateColorCodes('&', "&5&oLight and sharp as a razor."))
         swordMeta.lore = lore
 
+        swordMeta.isUnbreakable = true
         sword.itemMeta = swordMeta
 
         return sword
@@ -78,16 +82,57 @@ class Aerondight(private val plugin: Main) {
     /**
      * Updates sword's hit counter
      */
-    fun handleHit(damager: Player, item: ItemStack) {
+    fun addCounter(item: ItemStack) {
         val hitCounter = item.itemMeta?.persistentDataContainer?.get(HIT_COUNTER_KEY, PersistentDataType.INTEGER)
 
         if (hitCounter != null) {
             val counterAdd = hitCounter.plus(1)
             val newMeta = item.itemMeta?.clone()
             newMeta?.persistentDataContainer?.set(HIT_COUNTER_KEY, PersistentDataType.INTEGER, counterAdd)
-            damager.sendMessage("${ChatColor.GRAY}Hit Counter: $counterAdd")
 
             item.itemMeta = newMeta
+        }
+    }
+
+    /**
+     * Resets sword's hit counter
+     */
+    fun resetCounter(item: ItemStack) {
+        if (item.itemMeta?.persistentDataContainer?.has(HIT_COUNTER_KEY, PersistentDataType.INTEGER) == true) {
+            val newMeta = item.itemMeta?.clone()
+            newMeta?.persistentDataContainer?.set(HIT_COUNTER_KEY, PersistentDataType.INTEGER, 0)
+
+            item.itemMeta = newMeta
+        }
+    }
+
+    /**
+     * Returns current value of the sword's hit counter
+     */
+    fun getCounter(item: ItemStack): Int? {
+        return item.itemMeta?.persistentDataContainer?.get(HIT_COUNTER_KEY, PersistentDataType.INTEGER)
+    }
+
+    /**
+     * Handles the hit
+     */
+    fun handleHit(item: ItemStack) {
+        addCounter(item)
+
+        val counter = getCounter(item)
+        // Bukkit.getServer().broadcastMessage("$counter")
+
+        if (counter == 10) {
+            val newMeta = item.itemMeta?.clone()
+
+            newMeta?.removeAttributeModifier(Attribute.GENERIC_ATTACK_DAMAGE)
+            newMeta?.addAttributeModifier(Attribute.GENERIC_ATTACK_DAMAGE, CHARGED_DAMAGE_MODE)
+
+            item.itemMeta = newMeta
+        } else if (counter != null) {
+            if (counter >= 11) {
+                item.itemMeta = DEFAULT_ITEM_STACK?.itemMeta?.clone()
+            }
         }
     }
 }

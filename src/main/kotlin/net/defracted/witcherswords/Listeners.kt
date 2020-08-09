@@ -43,7 +43,7 @@ class Listeners(private val pl: Main) : Listener {
 
             // Check if got hit by Aerondight
             if (mainHandItemContainer?.get(pl.AERONDIGHT.PERSISTENT_KEY, PersistentDataType.STRING) == pl.AERONDIGHT.CODE_NAME) {
-                pl.AERONDIGHT.handleHit(damager, mainHandItem)
+                pl.AERONDIGHT.handleHit(mainHandItem)
             }
         }
     }
