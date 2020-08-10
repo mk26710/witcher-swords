@@ -35,7 +35,7 @@ class Listeners(private val pl: Main) : Listener {
     @EventHandler
     fun onHit(event: EntityDamageByEntityEvent) {
         val damager = event.damager
-        // val damaged = event.entity
+        val damaged = event.entity
 
         if (damager is Player) {
             val mainHandItem = damager.inventory.itemInMainHand
@@ -44,6 +44,12 @@ class Listeners(private val pl: Main) : Listener {
             // Check if got hit by Aerondight
             if (mainHandItemContainer?.get(pl.AERONDIGHT.PERSISTENT_KEY, PersistentDataType.STRING) == pl.AERONDIGHT.CODE_NAME) {
                 pl.AERONDIGHT.handleHit(mainHandItem)
+            }
+        } else if (damaged is Player) {
+            damaged.inventory.forEach {
+                if (it?.itemMeta?.persistentDataContainer?.get(pl.AERONDIGHT.PERSISTENT_KEY, PersistentDataType.STRING) == pl.AERONDIGHT.CODE_NAME) {
+                    pl.AERONDIGHT.resetCounter(it)
+                }
             }
         }
     }
