@@ -27,7 +27,6 @@ package net.defracted.witcherswords.items
 
 import net.defracted.witcherswords.Main
 import net.md_5.bungee.api.ChatColor
-import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.attribute.Attribute
@@ -120,7 +119,6 @@ class Aerondight(private val pl: Main) {
         addCounter(item)
 
         val counter = getCounter(item)
-        Bukkit.getServer().broadcastMessage("$counter")
 
         if (counter != null) {
             when {
