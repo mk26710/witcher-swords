@@ -54,7 +54,7 @@ class Aerondight(private val pl: Main) {
         val sword = ItemStack(Material.IRON_SWORD)
         val swordMeta = sword.itemMeta
 
-        swordMeta!!.setDisplayName(ChatColor.translateAlternateColorCodes('&', "&6&lAerondight"))
+        swordMeta!!.setDisplayName(ChatColor.translateAlternateColorCodes('&', "&6Aerondight &7✪✪✪"))
 
         val damageModifier = AttributeModifier(UUID.randomUUID(), "generic.attackDamage", 12.0, AttributeModifier.Operation.ADD_NUMBER, EquipmentSlot.HAND)
         swordMeta.addAttributeModifier(Attribute.GENERIC_ATTACK_DAMAGE, damageModifier)
@@ -71,6 +71,9 @@ class Aerondight(private val pl: Main) {
 
         val lore = ArrayList<String>()
         lore.add(ChatColor.translateAlternateColorCodes('&', "&5&oLight and sharp as a razor."))
+        lore.add("")
+        lore.add(ChatColor.translateAlternateColorCodes('&',"&5&oThis blade has a destiny of its own."))
+        lore.add(ChatColor.translateAlternateColorCodes('&',"&5&oTime will tell what that destiny is."))
         swordMeta.lore = lore
 
         swordMeta.isUnbreakable = true
@@ -99,10 +102,7 @@ class Aerondight(private val pl: Main) {
      */
     fun resetCounter(item: ItemStack) {
         if (item.itemMeta?.persistentDataContainer?.has(HIT_COUNTER_KEY, PersistentDataType.INTEGER) == true) {
-            val newMeta = item.itemMeta?.clone()
-            newMeta?.persistentDataContainer?.set(HIT_COUNTER_KEY, PersistentDataType.INTEGER, 0)
-
-            item.itemMeta = newMeta
+            item.itemMeta = DEFAULT_ITEM_STACK?.itemMeta?.clone()
         }
     }
 
@@ -120,19 +120,38 @@ class Aerondight(private val pl: Main) {
         addCounter(item)
 
         val counter = getCounter(item)
-        // Bukkit.getServer().broadcastMessage("$counter")
+        Bukkit.getServer().broadcastMessage("$counter")
 
-        if (counter == 10) {
-            val newMeta = item.itemMeta?.clone()
+        if (counter != null) {
+            when {
+                counter == 3 -> {
+                    val newMeta = item.itemMeta?.clone()
+                    newMeta?.setDisplayName(ChatColor.translateAlternateColorCodes('&', "&6Aerondight &b✪&7✪✪"))
+                    item.itemMeta = newMeta
+                }
 
-            newMeta?.removeAttributeModifier(Attribute.GENERIC_ATTACK_DAMAGE)
-            newMeta?.addAttributeModifier(Attribute.GENERIC_ATTACK_DAMAGE, CHARGED_DAMAGE_MODE)
+                counter == 6 -> {
+                    val newMeta = item.itemMeta?.clone()
+                    newMeta?.setDisplayName(ChatColor.translateAlternateColorCodes('&', "&6Aerondight &b✪✪&7✪"))
+                    item.itemMeta = newMeta
+                }
 
-            item.itemMeta = newMeta
-        } else if (counter != null) {
-            if (counter >= 11) {
-                item.itemMeta = DEFAULT_ITEM_STACK?.itemMeta?.clone()
+                counter == 10 -> {
+                    val newMeta = item.itemMeta?.clone()
+
+                    newMeta?.removeAttributeModifier(Attribute.GENERIC_ATTACK_DAMAGE)
+                    newMeta?.addAttributeModifier(Attribute.GENERIC_ATTACK_DAMAGE, CHARGED_DAMAGE_MODE)
+
+                    newMeta?.setDisplayName(ChatColor.translateAlternateColorCodes('&', "&6Aerondight &b✪✪✪"))
+
+                    item.itemMeta = newMeta
+                }
+
+                counter >= 11 -> {
+                    resetCounter(item)
+                }
             }
         }
+
     }
 }
